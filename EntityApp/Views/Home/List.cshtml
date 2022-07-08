@@ -1,28 +1,39 @@
-﻿@model IEnumerable<EntityApp.Models.Course>
+﻿@addTagHelper *, EntityApp
+@using EntityApp.Models
 
+@model CourseSortViewModel
 @{
     ViewData["Title"] = "List";
 }
-
 <h1>List</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form method="get">
+    <div>
+        <label>Name</label>
+        <input asp-for="Courses.FirstOrDefault().Name" /> 
+        <input type="submit" value="Filtering"/>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                <sort-header action="List" up="@Model.SortViewModel.Up" current="@Model.SortViewModel.Current"
+                    property="@Model.SortViewModel.NameSort">Name</sort-header>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DurationDays)
+                 <sort-header action="List" up="@Model.SortViewModel.Up" current="@Model.SortViewModel.Current"
+                    property="@Model.SortViewModel.DurationDays">DurationDays</sort-header>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Courses) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

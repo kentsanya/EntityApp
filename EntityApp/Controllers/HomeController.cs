@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using EntityApp.Context;
 using Microsoft.EntityFrameworkCore;
+using EntityApp.Other;
 
 
 namespace EntityApp.Controllers
@@ -22,9 +23,27 @@ namespace EntityApp.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> List()
+       
+
+        public async Task<IActionResult> List(string? name, SortState sortOrder=SortState.NameAsc)
         {
-            return View(await context.Courses.ToListAsync());
+            
+            IQueryable<Course> courses = context.Courses.Include(s => s.Students);
+            if (!string.IsNullOrEmpty(name)) 
+            {
+                courses = courses.Where(c => c.Name!.Contains(name));
+            }
+
+            courses = sortOrder switch
+            {
+                SortState.NameAsc=>courses.OrderBy(c=>c.Name),
+                SortState.NameDesc => courses.OrderByDescending(c => c.Name),
+                SortState.DurationDaysAsc => courses.OrderBy(c => c.DurationDays),
+                SortState.DurationDaysDesc => courses.OrderByDescending(c => c.DurationDays)
+            };
+            FilteringSortingViewModel viewModel = new FilteringSortingViewModel
+                (await courses.AsNoTracking().ToListAsync(), new SortViewModel(sortOrder), new FilterViewModel(context.Courses.ToList(), name));
+            return View(viewModel);
         }
 
 
